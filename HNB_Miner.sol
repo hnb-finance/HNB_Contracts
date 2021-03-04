@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.6.0;
-
 import "./BasicContract.sol";
 
 
@@ -84,6 +83,10 @@ contract HNBMasterChef is Ownable {
         totalAllocPoint = totalAllocPoint.sub(poolList[_pid].allocPoint).add(_allocPoint);
         poolList[_pid].allocPoint = _allocPoint;
     }
+    
+    function setPoolFeeRate(uint256 _pid, uint256 _feeRate) public onlyOwner {
+        poolList[_pid].feeRate = _feeRate;
+    }
 
     function isStartMining() public view returns(bool) {
         return block.number >= startBlock;
@@ -166,9 +169,12 @@ contract HNBMasterChef is Ownable {
         updatePool(_pid);
         uint256 pending = user.amount.mul(pool.accHnbPerShare).div(1e12).sub(user.rewardDebt);
         if (pending > 0) {
-            require(msg.value >= pending.mul(pool.feeRate).div(1e18), "Fee: not enough");
+            uint256 fee = pending.mul(pool.feeRate).div(1e18);
+            require(msg.value >= fee, "Fee: not enough");
             safeHnbTransfer(msg.sender, pending);
-            msg.sender.transfer(msg.value.sub(pool.feeRate.mul(pending)));
+            if (msg.value > fee)
+                msg.sender.transfer(msg.value.sub(fee));
+            fundAddr.transfer(fee);
         }
         if (_lpAmount > 0) {
             user.amount = user.amount.sub(_lpAmount);
@@ -197,9 +203,5 @@ contract HNBMasterChef is Ownable {
         } else {
             hnb.transfer(_to, _amount);
         }
-    }
-
-    function withdrawFee() public onlyOwner {
-        fundAddr.sendValue(address(this).balance);
     }
 }

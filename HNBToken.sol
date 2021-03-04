@@ -6,14 +6,14 @@
 pragma solidity ^0.6.0;
 import "./BasicContract.sol";
 
-contract HBNToken is ERC20, Ownable {
+contract HNBToken is ERC20, Ownable {
     uint256 private constant preMineSupply = 300000000 * 1e18; 
     uint256 private constant maxSupply = 1000000000 * 1e18;     // the total supply
 
     using EnumerableSet for EnumerableSet.AddressSet;
     EnumerableSet.AddressSet private _minters;
 
-    constructor() public ERC20("HNB Token test", "HNBTest"){
+    constructor() public ERC20("HNB Token", "HNB") {
         _mint(msg.sender, preMineSupply);
     }
 
@@ -27,12 +27,12 @@ contract HBNToken is ERC20, Ownable {
     }
 
     function addMinter(address _addMinter) public onlyOwner returns (bool) {
-        require(_addMinter != address(0), "MdxToken: _addMinter is the zero address");
+        require(_addMinter != address(0), "HNBToken: _addMinter is the zero address");
         return EnumerableSet.add(_minters, _addMinter);
     }
 
     function delMinter(address _delMinter) public onlyOwner returns (bool) {
-        require(_delMinter != address(0), "MdxToken: _delMinter is the zero address");
+        require(_delMinter != address(0), "HNBToken: _delMinter is the zero address");
         return EnumerableSet.remove(_minters, _delMinter);
     }
 
@@ -45,7 +45,7 @@ contract HBNToken is ERC20, Ownable {
     }
 
     function getMinter(uint256 _index) public view onlyOwner returns (address){
-        require(_index <= getMinterLength() - 1, "MdxToken: index out of bounds");
+        require(_index <= getMinterLength() - 1, "HNBToken: index out of bounds");
         return EnumerableSet.at(_minters, _index);
     }
 
